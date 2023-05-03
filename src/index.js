@@ -6,9 +6,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('.search-form');
 const input = document.getElementById('search-form');
-const button = document.querySelector('button[type="submit"]');
 const loadBtn = document.querySelector('.btn-load');
-
 const gallery = document.querySelector('.gallery');
 
 let value;
@@ -31,8 +29,9 @@ function inputSearch(e) {
 
 function submitSearch(e) {
   e.preventDefault();
-  const url = `${BASE_URL}?key=${KEY}&q=${value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`;
   gallery.innerHTML = '';
+  page = 1;
+  const url = `${BASE_URL}?key=${KEY}&q=${value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`;
 
   fetch(url)
     .then(r => r.json())
@@ -44,7 +43,7 @@ function submitSearch(e) {
         );
       } else {
         Notiflix.Notify.success(`Hooray! We found ${cards.totalHits} images.`);
-        bildloadButton(cards);
+        bildLoadCard(cards);
         loadBtn.classList.remove('hidden');
       }
     })
@@ -56,25 +55,25 @@ function loadButton() {
   const url = `${BASE_URL}?key=${KEY}&q=${value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`;
   fetch(url)
     .then(r => r.json())
-    .then(card => {
-      if (card.total === 0) {
+    .then(cards => {
+      if (cards.total === 0) {
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
-      } else if (card.hits.length === card.totalHits) {
+      } else if (cards.hits.length === cards.totalHits) {
         Notiflix.Notify.failure(
           "We're sorry, but you've reached the end of search results."
         );
       } else {
-        console.log(card);
-        bildloadButton(card);
+        console.log(cards);
+        bildLoadCard(cards);
         loadBtn.classList.remove('hidden');
       }
     })
     .catch(error => console.log(error));
 }
 
-function bildloadButton(cards) {
+function bildLoadCard(cards) {
   const markup = cards.hits
     .map(hit => {
       return `
@@ -109,8 +108,9 @@ function bildloadButton(cards) {
         </div>`;
     })
     .join('');
+
   gallery.insertAdjacentHTML('beforeend', markup);
 
-  const lightbox = new SimpleLightbox('.lightbox');
   lightbox.refresh();
 }
+const lightbox = new SimpleLightbox('.lightbox');
